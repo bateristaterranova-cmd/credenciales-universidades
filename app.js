@@ -186,13 +186,13 @@ function renderAllViews() {
     // Status badge styling
     if (statusBadge) {
       if (studentData.status.toUpperCase() === 'ACTIVO') {
-        statusBadge.className = 'bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
+        statusBadge.className = 'bg-[#bcf0cb] text-[#156c38] font-bold px-2.5 py-0.5 rounded-[4px] flex items-center gap-1.5 mb-5 mt-2 shadow-2xs text-[13px] tracking-wide';
         const icon = statusBadge.querySelector('i');
-        if (icon) icon.className = 'fa-solid fa-circle-check';
+        if (icon) icon.className = 'fa-solid fa-circle-check text-xs';
       } else {
-        statusBadge.className = 'bg-red-100 text-red-700 font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
+        statusBadge.className = 'bg-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-[4px] flex items-center gap-1.5 mb-5 mt-2 shadow-2xs text-[13px] tracking-wide';
         const icon = statusBadge.querySelector('i');
-        if (icon) icon.className = 'fa-solid fa-circle-xmark';
+        if (icon) icon.className = 'fa-solid fa-circle-xmark text-xs';
       }
     }
 
@@ -212,7 +212,7 @@ function renderBarcode(code) {
       JsBarcode('#barcodeSvg', code, {
         format: 'CODE128',
         lineColor: '#000000',
-        width: 2.3,
+        width: 2.75,
         height: 48,
         displayValue: false,
         margin: 0,

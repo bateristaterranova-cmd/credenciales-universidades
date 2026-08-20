@@ -393,16 +393,44 @@
   <section id="credentialScreen" class="screen screen-hidden flex flex-col min-h-screen bg-white selection:bg-brandPurple selection:text-white antialiased">
     
     <!-- TOP HEADER (Exact 100% Match: Only Chevron and ID CARD) -->
-    <header class="bg-white px-4 py-4 flex items-center shadow-sm z-30 sticky top-0 safe-top">
-      <button id="upnBackBtn" onclick="showHomeScreen()" aria-label="Atrás" class="text-brandYellow mr-4 p-2 -ml-2 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none cursor-pointer">
-        <i class="fa-solid fa-chevron-left text-xl pointer-events-none"></i>
+    <header class="bg-white px-4 py-3.5 flex items-center shadow-xs z-30 sticky top-0 safe-top">
+      <button id="upnBackBtn" onclick="showHomeScreen(event)" aria-label="Atrás" class="text-brandYellow mr-4 p-1.5 -ml-1 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none cursor-pointer">
+        <i class="fa-solid fa-chevron-left text-lg pointer-events-none"></i>
       </button>
-      <h1 class="text-xl font-bold font-anton tracking-wide text-black uppercase">ID CARD</h1>
+      <h1 class="text-[20px] font-anton tracking-[0.06em] text-black uppercase">ID CARD</h1>
     </header>
 
     <!-- MAIN VIEWPORT WITH VIBRANT YELLOW CANVAS & ANIMATED ARROWS -->
-    <main class="flex-grow bg-texture-yellow relative px-5 pt-20 pb-8 flex flex-col items-center justify-start overflow-y-auto">
+    <main class="flex-grow bg-texture-yellow relative px-4.5 pt-20 pb-8 flex flex-col items-center justify-start overflow-y-auto">
       <div class="noise-overlay"></div>
+
+      <!-- FIXED BOTTOM VERTICAL STRIPES (TRACKS) -->
+      <div class="absolute bottom-0 left-0 right-0 h-32 flex justify-between px-6 items-end pointer-events-none z-0">
+        <!-- Group 1: Black-Yellow-Black -->
+        <div class="flex h-32 w-10 justify-between">
+          <div class="w-4 h-full bg-black"></div>
+          <div class="w-1.5 h-full bg-brandYellow"></div>
+          <div class="w-4 h-full bg-black"></div>
+        </div>
+        <!-- Group 2: White-Yellow-White -->
+        <div class="flex h-32 w-8 justify-between">
+          <div class="w-4 h-full bg-white"></div>
+          <div class="w-1.5 h-full bg-brandYellow"></div>
+          <div class="w-2 h-full bg-white"></div>
+        </div>
+        <!-- Group 3: Black-Yellow-Black -->
+        <div class="flex h-32 w-10 justify-between">
+          <div class="w-4 h-full bg-black"></div>
+          <div class="w-1.5 h-full bg-brandYellow"></div>
+          <div class="w-4 h-full bg-black"></div>
+        </div>
+        <!-- Group 4: White-Yellow-White -->
+        <div class="flex h-32 w-8 justify-between">
+          <div class="w-4 h-full bg-white"></div>
+          <div class="w-1.5 h-full bg-brandYellow"></div>
+          <div class="w-2 h-full bg-white"></div>
+        </div>
+      </div>
 
       <!-- ANIMATED UPWARD CHEVRON ARROWS BACKGROUND (VIDEO EFFECT CLONE) -->
       <div class="animated-arrows-bg">
@@ -472,50 +500,50 @@
       </div>
 
       <!-- WHITE FLOATING ID CARD -->
-      <article id="idCard" class="bg-white rounded-[1rem] w-full max-w-sm shadow-xl relative pt-16 pb-8 px-6 flex flex-col items-center mt-8 mb-8 z-10">
+      <article id="idCard" class="bg-white rounded-[22px] w-full max-w-[362px] shadow-[0_14px_34px_rgba(0,0,0,0.12)] relative pt-16 pb-7 px-5 flex flex-col items-center mt-7 mb-6 z-10 select-none">
         
         <!-- PROFILE AVATAR (Overlapping top) -->
-        <div class="absolute -top-20 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full border-2 border-brandYellow shadow-md overflow-hidden bg-white z-20 flex items-center justify-center">
+        <div class="absolute -top-[64px] left-1/2 transform -translate-x-1/2 w-[128px] h-[128px] rounded-full border-[2px] border-brandYellow shadow-sm overflow-hidden bg-white z-20 flex items-center justify-center">
           <img id="studentPhoto" alt="Foto de Perfil" class="w-full h-full object-cover" src="assets/avatar.png" />
         </div>
 
         <!-- STATUS BADGE -->
-        <div id="statusBadge" class="bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm">
-          <i class="fa-solid fa-circle-check"></i>
+        <div id="statusBadge" class="bg-[#bcf0cb] text-[#156c38] font-bold px-2.5 py-0.5 rounded-[4px] flex items-center gap-1.5 mb-5 mt-2 shadow-2xs text-[13px] tracking-wide">
+          <i class="fa-solid fa-circle-check text-xs"></i>
           <span id="studentStatus">ACTIVO</span>
         </div>
 
         <!-- STUDENT NAME -->
-        <h2 id="studentName" class="font-anton text-[2rem] text-center purple-text leading-[1.1] mb-5 uppercase tracking-wide">
+        <h2 id="studentName" class="font-anton text-[29px] text-center purple-text leading-[1.08] mb-3.5 uppercase tracking-[0.02em]">
           LEONARDO VALENTIN<br />HUAMANI ROMERO
         </h2>
 
         <!-- MAJOR -->
-        <p id="studentCareer" class="text-[1.15rem] font-bold text-black text-center mb-4 leading-snug">
+        <p id="studentCareer" class="text-[17px] font-bold text-black text-center mb-1.5 leading-snug">
           Adm. y Negoc. Internacionales
         </p>
 
         <!-- LEVEL -->
-        <div class="flex items-center justify-center gap-2 text-black mb-8">
-          <i class="fa-solid fa-graduation-cap"></i>
-          <span id="studentLevel" class="text-base font-medium">Pregrado</span>
+        <div class="flex items-center justify-center gap-1.5 text-black mb-6">
+          <span class="text-base">🎓</span>
+          <span id="studentLevel" class="text-[15px] font-medium">Pregrado</span>
         </div>
 
         <!-- DIVIDER -->
-        <div class="w-[110%] -ml-[5%] dashed-divider my-2"></div>
+        <div class="w-[112%] -ml-[6%] dashed-divider mb-5"></div>
 
         <!-- DYNAMIC LIVE CLOCK (HH:MM:SS) -->
-        <div id="liveClock" class="font-anton text-[2.5rem] purple-text mt-8 mb-6 tracking-wider leading-none">
+        <div id="liveClock" class="font-anton text-[40px] purple-text my-1 tracking-wider leading-none">
           12:33:56
         </div>
 
         <!-- BARCODE AREA (JsBarcode SVG) -->
-        <div class="w-full mb-2 px-2 flex justify-center items-center">
-          <svg id="barcodeSvg" class="h-12 w-full max-w-[280px]"></svg>
+        <div class="w-full my-3 px-1 flex justify-center items-center">
+          <svg id="barcodeSvg" class="h-12 w-full max-w-[285px]"></svg>
         </div>
 
         <!-- CURRENT LIVE DATE OF TODAY -->
-        <p id="currentDate" class="text-black text-base mt-2">
+        <p id="currentDate" class="text-black text-[14.5px] font-normal mt-2">
           20 agosto 2026
         </p>
       </article>
