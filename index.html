@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>ID Card - Carné Digital</title>
+  <title>Credenciales Universitarias - UPN</title>
   
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json" />
@@ -11,7 +11,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="ID Card" />
+  <meta name="apple-mobile-web-app-title" content="Credenciales" />
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
 
@@ -33,7 +33,8 @@
             brandYellow: '#f7a81b',
             brandPurple: '#791bd0',
             brandGreen: '#b8e6c7',
-            textGreen: '#1b7d3f'
+            textGreen: '#1b7d3f',
+            upnDark: '#121212'
           },
           fontFamily: {
             anton: ['Anton', 'sans-serif'],
@@ -45,7 +46,6 @@
   </script>
 
   <style>
-    /* Custom Styling for High Fidelity */
     * {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -54,10 +54,10 @@
 
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f7a81b;
       min-height: 100vh;
       min-height: -webkit-fill-available;
       overflow-x: hidden;
+      background-color: #f8fafc;
     }
 
     .font-anton {
@@ -103,132 +103,386 @@
     .safe-bottom {
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
+
+    /* ANIMATED UPWARD CHEVRON ARROWS BACKGROUND */
+    .animated-arrows-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+      mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 95%);
+      -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 95%);
+    }
+
+    .arrow-lane {
+      position: absolute;
+      bottom: -60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      will-change: transform;
+      animation: riseArrow infinite linear;
+    }
+
+    @keyframes riseArrow {
+      0% {
+        transform: translateY(0);
+        opacity: 0.95;
+      }
+      75% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(-95vh);
+        opacity: 0;
+      }
+    }
+
+    .lane-1 {
+      left: 7%;
+      animation-duration: 3.6s;
+      animation-delay: 0s;
+    }
+    .lane-1-b {
+      left: 7%;
+      animation-duration: 3.6s;
+      animation-delay: 1.8s;
+    }
+
+    .lane-2 {
+      left: 33%;
+      animation-duration: 4.2s;
+      animation-delay: 0.7s;
+    }
+    .lane-2-b {
+      left: 33%;
+      animation-duration: 4.2s;
+      animation-delay: 2.8s;
+    }
+
+    .lane-3 {
+      left: 60%;
+      animation-duration: 3.8s;
+      animation-delay: 1.2s;
+    }
+    .lane-3-b {
+      left: 60%;
+      animation-duration: 3.8s;
+      animation-delay: 3.1s;
+    }
+
+    .lane-4 {
+      left: 84%;
+      animation-duration: 4.4s;
+      animation-delay: 0.3s;
+    }
+    .lane-4-b {
+      left: 84%;
+      animation-duration: 4.4s;
+      animation-delay: 2.5s;
+    }
+
+    /* Screen transition */
+    .screen {
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    }
+    .screen-hidden {
+      display: none !important;
+    }
   </style>
 </head>
-<body class="flex flex-col min-h-screen bg-white selection:bg-brandPurple selection:text-white antialiased">
+<body class="selection:bg-brandPurple selection:text-white antialiased">
 
-  <!-- TOP HEADER -->
-  <header class="bg-white px-4 py-3.5 flex items-center justify-between shadow-xs sticky top-0 z-30 safe-top">
-    <div class="flex items-center gap-3">
-      <button aria-label="Atrás" class="text-brandYellow p-1.5 -ml-1 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none">
+  <!-- ========================================== -->
+  <!-- 1. PANTALLA PRINCIPAL (HOME / HUB) -->
+  <!-- ========================================== -->
+  <section id="homeScreen" class="screen flex flex-col min-h-screen bg-slate-50 text-slate-800">
+    
+    <!-- Home Header -->
+    <header class="bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between sticky top-0 z-30 shadow-xs safe-top">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-brandYellow flex items-center justify-center text-white shadow-xs font-bold text-lg">
+          <i class="fa-solid fa-graduation-cap text-black"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-none">Mis Credenciales</h1>
+          <p class="text-xs text-slate-500 font-medium mt-0.5">Portal Universitario</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-2">
+        <button id="pwaInstallBtn" title="Instalar PWA" class="hidden bg-brandYellow hover:bg-yellow-500 text-black text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-xs transition-all active:scale-95">
+          <i class="fa-solid fa-download"></i>
+          <span>Instalar App</span>
+        </button>
+        <button id="homeFullscreenBtn" title="Pantalla Completa" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-expand text-sm"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Home Main Content -->
+    <main class="flex-1 max-w-lg w-full mx-auto p-5 pb-12 space-y-6">
+      
+      <!-- Student Profile Card with Edit Button -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <img id="homeUserAvatar" src="assets/avatar.png" class="w-14 h-14 rounded-full border-2 border-brandYellow object-cover shadow-xs bg-white" alt="Avatar" />
+            <span class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></span>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-brandPurple uppercase tracking-wider">Estudiante</div>
+            <h2 id="homeUserName" class="text-base font-bold text-slate-900 leading-tight">LEONARDO VALENTIN HUAMANI ROMERO</h2>
+            <p id="homeUserCareer" class="text-xs text-slate-500 mt-0.5">Adm. y Negoc. Internacionales</p>
+          </div>
+        </div>
+        <button id="homeEditBtn" class="bg-slate-100 hover:bg-purple-50 hover:text-brandPurple text-slate-700 p-2.5 rounded-xl transition-colors shrink-0 shadow-2xs" title="Configurar Datos">
+          <i class="fa-solid fa-user-pen text-base"></i>
+        </button>
+      </div>
+
+      <!-- University Credentials Section -->
+      <div>
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-id-card text-brandYellow"></i>
+            Credenciales Universitarias
+          </h3>
+          <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">1 Activa</span>
+        </div>
+
+        <!-- UPN CARD (Active & Featured) -->
+        <div id="openUpnCard" class="group bg-white rounded-2xl overflow-hidden border-2 border-amber-300 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative">
+          <!-- Card Banner -->
+          <div class="bg-[#f7a81b] p-4 flex items-center justify-between relative overflow-hidden">
+            <div class="z-10 flex items-center gap-3">
+              <div class="bg-black text-white font-anton text-sm tracking-wider px-2.5 py-1 rounded-md">
+                UPN
+              </div>
+              <div>
+                <h4 class="font-bold text-black text-base leading-tight">Universidad Privada del Norte</h4>
+                <p class="text-xs text-black/80 font-medium">Carné Digital Oficial</p>
+              </div>
+            </div>
+            <span class="z-10 bg-[#b8e6c7] text-[#1b7d3f] text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1">
+              <i class="fa-solid fa-circle-check text-[10px]"></i> ACTIVO
+            </span>
+          </div>
+
+          <!-- Card Body Preview -->
+          <div class="p-4 flex items-center justify-between bg-white">
+            <div class="space-y-1">
+              <div class="text-xs text-slate-400 font-medium">Formato de carné:</div>
+              <div class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <span>ID Card Digital</span>
+                <span class="text-xs bg-purple-50 text-brandPurple font-bold px-2 py-0.5 rounded">Pregrado</span>
+              </div>
+              <div class="text-xs text-slate-500 font-mono" id="homeUserCode">Código: N00409105</div>
+            </div>
+            
+            <div class="flex items-center gap-2 bg-brandPurple group-hover:bg-purple-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-colors">
+              <span>Abrir Carné</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMING SOON CARDS (Expandable in the future) -->
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          
+          <!-- UPC Placeholder -->
+          <div class="bg-white/70 rounded-xl p-3.5 border border-slate-200 opacity-60 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-red-600 text-xs">UPC</span>
+              <span class="text-[10px] bg-slate-100 text-slate-500 font-medium px-1.5 py-0.5 rounded">Pronto</span>
+            </div>
+            <div class="text-xs font-medium text-slate-700 mt-2">Universidad Peruana de Ciencias Aplicadas</div>
+          </div>
+
+          <!-- PUCP Placeholder -->
+          <div class="bg-white/70 rounded-xl p-3.5 border border-slate-200 opacity-60 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-blue-700 text-xs">PUCP</span>
+              <span class="text-[10px] bg-slate-100 text-slate-500 font-medium px-1.5 py-0.5 rounded">Pronto</span>
+            </div>
+            <div class="text-xs font-medium text-slate-700 mt-2">Pontificia Universidad Católica del Perú</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Information Box -->
+      <div class="bg-amber-50/80 border border-amber-200/60 rounded-xl p-4 text-xs text-amber-900 flex items-start gap-3">
+        <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 text-sm"></i>
+        <div class="space-y-1">
+          <p class="font-semibold">Información del Carné Digital</p>
+          <p class="text-amber-800/90 leading-relaxed">
+            La pantalla de carné de la UPN se muestra como una copia fiel al 100% de la aplicación oficial. Los datos editados se guardan en tu dispositivo y la hora/fecha siempre se sincronizan en tiempo real.
+          </p>
+        </div>
+      </div>
+
+    </main>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- 2. PANTALLA CREDENCIAL UPN (100% CLON FIEL) -->
+  <!-- ========================================== -->
+  <section id="credentialScreen" class="screen screen-hidden flex flex-col min-h-screen bg-white selection:bg-brandPurple selection:text-white antialiased">
+    
+    <!-- TOP HEADER (Exact 100% Match: Only Chevron and ID CARD) -->
+    <header class="bg-white px-4 py-4 flex items-center shadow-sm z-30 sticky top-0 safe-top">
+      <button id="upnBackBtn" aria-label="Atrás" class="text-brandYellow mr-4 p-2 -ml-2 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none">
         <i class="fa-solid fa-chevron-left text-xl"></i>
       </button>
-      <h1 class="text-[21px] font-anton text-black tracking-wider uppercase">ID CARD</h1>
-    </div>
+      <h1 class="text-xl font-bold font-anton tracking-wide text-black uppercase">ID CARD</h1>
+    </header>
 
-    <!-- Quick action buttons -->
-    <div class="flex items-center gap-2">
-      <button id="pwaInstallBtn" title="Instalar App" class="hidden text-brandPurple bg-purple-50 hover:bg-purple-100 p-2 rounded-full text-sm font-semibold flex items-center gap-1.5 px-3 transition-colors">
-        <i class="fa-solid fa-download"></i>
-        <span class="text-xs">Instalar</span>
-      </button>
-      <button id="fullscreenBtn" title="Pantalla Completa" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
-        <i class="fa-solid fa-expand text-sm"></i>
-      </button>
-      <button id="openEditBtn" title="Personalizar Datos" class="text-gray-400 hover:text-brandPurple p-2 rounded-full hover:bg-purple-50 transition-colors">
-        <i class="fa-solid fa-sliders text-base"></i>
-      </button>
-    </div>
-  </header>
+    <!-- MAIN VIEWPORT WITH VIBRANT YELLOW CANVAS & ANIMATED ARROWS -->
+    <main class="flex-grow bg-texture-yellow relative px-5 pt-20 pb-8 flex flex-col items-center justify-start overflow-y-auto">
+      <div class="noise-overlay"></div>
 
-  <!-- MAIN VIEWPORT WITH VIBRANT YELLOW CANVAS & STRIPES -->
-  <main class="flex-1 bg-texture-yellow relative flex flex-col items-center justify-start px-4 pt-20 pb-10 overflow-hidden">
-    <div class="noise-overlay"></div>
+      <!-- ANIMATED UPWARD CHEVRON ARROWS BACKGROUND (VIDEO EFFECT CLONE) -->
+      <div class="animated-arrows-bg">
+        <!-- Lane 1: Black Chevrons -->
+        <div class="arrow-lane lane-1">
+          <svg width="40" height="90" viewBox="0 0 40 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 5 L35 22 L28 22 L20 13 L12 22 L5 22 Z" fill="#000000"/>
+            <rect x="7" y="24" width="9" height="66" fill="#000000"/>
+            <rect x="24" y="24" width="9" height="66" fill="#000000"/>
+          </svg>
+        </div>
+        <div class="arrow-lane lane-1-b">
+          <svg width="40" height="90" viewBox="0 0 40 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 5 L35 22 L28 22 L20 13 L12 22 L5 22 Z" fill="#000000"/>
+            <rect x="7" y="24" width="9" height="66" fill="#000000"/>
+            <rect x="24" y="24" width="9" height="66" fill="#000000"/>
+          </svg>
+        </div>
 
-    <!-- DECORATIVE VERTICAL BOTTOM STRIPES (Exact Match to Screenshot) -->
-    <div class="absolute bottom-0 left-0 right-0 h-32 flex justify-between px-7 items-end pointer-events-none z-0">
-      <!-- Group 1: Black-Yellow-Black -->
-      <div class="flex h-32 w-10 justify-between">
-        <div class="w-4 h-full bg-black"></div>
-        <div class="w-1.5 h-full bg-brandYellow"></div>
-        <div class="w-4 h-full bg-black"></div>
+        <!-- Lane 2: White Chevrons -->
+        <div class="arrow-lane lane-2">
+          <svg width="34" height="90" viewBox="0 0 34 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 5 L30 20 L24 20 L17 12 L10 20 L4 20 Z" fill="#ffffff"/>
+            <rect x="5" y="22" width="8" height="68" fill="#ffffff"/>
+            <rect x="19" y="22" width="5" height="68" fill="#ffffff"/>
+          </svg>
+        </div>
+        <div class="arrow-lane lane-2-b">
+          <svg width="34" height="90" viewBox="0 0 34 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 5 L30 20 L24 20 L17 12 L10 20 L4 20 Z" fill="#ffffff"/>
+            <rect x="5" y="22" width="8" height="68" fill="#ffffff"/>
+            <rect x="19" y="22" width="5" height="68" fill="#ffffff"/>
+          </svg>
+        </div>
+
+        <!-- Lane 3: Black Chevrons -->
+        <div class="arrow-lane lane-3">
+          <svg width="40" height="90" viewBox="0 0 40 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 5 L35 22 L28 22 L20 13 L12 22 L5 22 Z" fill="#000000"/>
+            <rect x="7" y="24" width="9" height="66" fill="#000000"/>
+            <rect x="24" y="24" width="9" height="66" fill="#000000"/>
+          </svg>
+        </div>
+        <div class="arrow-lane lane-3-b">
+          <svg width="40" height="90" viewBox="0 0 40 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 5 L35 22 L28 22 L20 13 L12 22 L5 22 Z" fill="#000000"/>
+            <rect x="7" y="24" width="9" height="66" fill="#000000"/>
+            <rect x="24" y="24" width="9" height="66" fill="#000000"/>
+          </svg>
+        </div>
+
+        <!-- Lane 4: White Chevrons -->
+        <div class="arrow-lane lane-4">
+          <svg width="34" height="90" viewBox="0 0 34 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 5 L30 20 L24 20 L17 12 L10 20 L4 20 Z" fill="#ffffff"/>
+            <rect x="5" y="22" width="8" height="68" fill="#ffffff"/>
+            <rect x="19" y="22" width="5" height="68" fill="#ffffff"/>
+          </svg>
+        </div>
+        <div class="arrow-lane lane-4-b">
+          <svg width="34" height="90" viewBox="0 0 34 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 5 L30 20 L24 20 L17 12 L10 20 L4 20 Z" fill="#ffffff"/>
+            <rect x="5" y="22" width="8" height="68" fill="#ffffff"/>
+            <rect x="19" y="22" width="5" height="68" fill="#ffffff"/>
+          </svg>
+        </div>
       </div>
 
-      <!-- Group 2: White-Yellow-White -->
-      <div class="flex h-32 w-8 justify-between">
-        <div class="w-3.5 h-full bg-white"></div>
-        <div class="w-1.5 h-full bg-brandYellow"></div>
-        <div class="w-2 h-full bg-white"></div>
-      </div>
+      <!-- WHITE FLOATING ID CARD -->
+      <article id="idCard" class="bg-white rounded-[1rem] w-full max-w-sm shadow-xl relative pt-16 pb-8 px-6 flex flex-col items-center mt-8 mb-8 z-10">
+        
+        <!-- PROFILE AVATAR (Overlapping top) -->
+        <div class="absolute -top-20 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full border-2 border-brandYellow shadow-md overflow-hidden bg-white z-20 flex items-center justify-center">
+          <img id="studentPhoto" alt="Foto de Perfil" class="w-full h-full object-cover" src="assets/avatar.png" />
+        </div>
 
-      <!-- Group 3: Black-Yellow-Black -->
-      <div class="flex h-32 w-10 justify-between">
-        <div class="w-4 h-full bg-black"></div>
-        <div class="w-1.5 h-full bg-brandYellow"></div>
-        <div class="w-4 h-full bg-black"></div>
-      </div>
+        <!-- STATUS BADGE -->
+        <div id="statusBadge" class="bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm">
+          <i class="fa-solid fa-circle-check"></i>
+          <span id="studentStatus">ACTIVO</span>
+        </div>
 
-      <!-- Group 4: White-Yellow-White -->
-      <div class="flex h-32 w-8 justify-between">
-        <div class="w-3.5 h-full bg-white"></div>
-        <div class="w-1.5 h-full bg-brandYellow"></div>
-        <div class="w-2 h-full bg-white"></div>
-      </div>
-    </div>
+        <!-- STUDENT NAME -->
+        <h2 id="studentName" class="font-anton text-[2rem] text-center purple-text leading-[1.1] mb-5 uppercase tracking-wide">
+          LEONARDO VALENTIN<br />HUAMANI ROMERO
+        </h2>
 
-    <!-- WHITE FLOATING ID CARD -->
-    <article id="idCard" class="bg-white rounded-[26px] w-full max-w-[344px] shadow-[0_12px_32px_rgba(0,0,0,0.12)] relative pt-16 pb-6 px-6 flex flex-col items-center z-10 mt-2 mb-4 transition-all">
-      
-      <!-- PROFILE AVATAR (Overlapping top edge) -->
-      <div class="absolute -top-[65px] left-1/2 transform -translate-x-1/2 w-[128px] h-[128px] rounded-full border-[2.5px] border-brandYellow shadow-md overflow-hidden bg-white z-20 flex items-center justify-center">
-        <img id="studentPhoto" alt="Foto de Perfil" class="w-full h-full object-cover" src="assets/avatar.png" />
-      </div>
+        <!-- MAJOR -->
+        <p id="studentCareer" class="text-[1.15rem] font-bold text-black text-center mb-4 leading-snug">
+          Adm. y Negoc. Internacionales
+        </p>
 
-      <!-- STATUS BADGE -->
-      <div id="statusBadge" class="bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-4 mt-2 shadow-xs text-[13px] tracking-wide">
-        <i class="fa-solid fa-circle-check text-xs"></i>
-        <span id="studentStatus">ACTIVO</span>
-      </div>
+        <!-- LEVEL -->
+        <div class="flex items-center justify-center gap-2 text-black mb-8">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span id="studentLevel" class="text-base font-medium">Pregrado</span>
+        </div>
 
-      <!-- STUDENT NAME (2 lines in purple Anton) -->
-      <h2 id="studentName" class="font-anton text-[29px] text-center purple-text leading-[1.08] mb-3.5 uppercase tracking-wide">
-        LEONARDO VALENTIN<br />HUAMANI ROMERO
-      </h2>
+        <!-- DIVIDER -->
+        <div class="w-[110%] -ml-[5%] dashed-divider my-2"></div>
 
-      <!-- MAJOR / DEGREE -->
-      <p id="studentCareer" class="text-[17.5px] font-bold text-black text-center mb-2 leading-snug">
-        Adm. y Negoc. Internacionales
-      </p>
+        <!-- DYNAMIC LIVE CLOCK (HH:MM:SS) -->
+        <div id="liveClock" class="font-anton text-[2.5rem] purple-text mt-8 mb-6 tracking-wider leading-none">
+          12:33:56
+        </div>
 
-      <!-- MODALITY / LEVEL -->
-      <div class="flex items-center justify-center gap-1.5 text-black mb-5">
-        <span class="text-base">🎓</span>
-        <span id="studentLevel" class="text-[15px] font-medium">Pregrado</span>
-      </div>
+        <!-- BARCODE AREA (JsBarcode SVG) -->
+        <div class="w-full mb-2 px-2 flex justify-center items-center">
+          <svg id="barcodeSvg" class="h-12 w-full max-w-[280px]"></svg>
+        </div>
 
-      <!-- DASHED DIVIDER -->
-      <div class="w-[110%] -ml-[5%] dashed-divider mb-5"></div>
+        <!-- CURRENT LIVE DATE OF TODAY -->
+        <p id="currentDate" class="text-black text-base mt-2">
+          20 agosto 2026
+        </p>
+      </article>
 
-      <!-- DYNAMIC LIVE CLOCK (HH:MM:SS) -->
-      <div id="liveClock" class="font-anton text-[42px] purple-text my-2 tracking-wider leading-none">
-        12:33:56
-      </div>
+    </main>
 
-      <!-- BARCODE AREA (JsBarcode SVG) -->
-      <div class="w-full my-3 px-1 flex justify-center items-center">
-        <svg id="barcodeSvg" class="h-12 w-full max-w-[268px]"></svg>
-      </div>
+    <!-- Safe area for iOS bottom bar -->
+    <div class="h-4 bg-brandYellow w-full safe-bottom"></div>
+  </section>
 
-      <!-- CURRENT LIVE DATE OF TODAY IN SPANISH -->
-      <p id="currentDate" class="text-[#222222] text-[15px] font-normal mt-2">
-        20 agosto 2026
-      </p>
-    </article>
 
-  </main>
-
-  <!-- SAFE BOTTOM AREA FOR MOBILE GESTURE BAR -->
-  <div class="h-4 bg-brandYellow w-full safe-bottom"></div>
-
-  <!-- EDIT / CUSTOMIZATION MODAL (Accessible via settings icon or double tap) -->
+  <!-- ========================================== -->
+  <!-- 3. MODAL DE PERSONALIZACIÓN DE DATOS -->
+  <!-- ========================================== -->
   <div id="editModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 overflow-y-auto max-h-[92vh] animate-in fade-in zoom-in-95 duration-200">
       
       <!-- Modal Header -->
       <div class="flex justify-between items-center pb-3 border-b border-gray-100 mb-4">
         <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <i class="fa-solid fa-id-card text-brandPurple"></i>
-          Personalizar Carné Digital
+          <i class="fa-solid fa-user-gear text-brandPurple"></i>
+          Configurar Datos del Carné
         </h3>
         <button id="closeEditBtn" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
           <i class="fa-solid fa-xmark text-xl"></i>
@@ -239,40 +493,45 @@
       <div class="space-y-4 text-sm">
         
         <!-- Photo Preview & Upload -->
-        <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
-          <img id="modalPhotoPreview" src="assets/avatar.png" class="w-16 h-16 rounded-full border-2 border-brandYellow object-cover bg-white" alt="Preview" />
+        <div class="flex items-center gap-4 bg-gray-50 p-3.5 rounded-xl border border-gray-200/60">
+          <img id="modalPhotoPreview" src="assets/avatar.png" class="w-16 h-16 rounded-full border-2 border-brandYellow object-cover bg-white shadow-xs" alt="Preview" />
           <div class="flex-1">
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Foto de Perfil</label>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Foto de Perfil</label>
             <input type="file" id="photoInput" accept="image/*" class="hidden" />
-            <button id="uploadPhotoBtn" type="button" class="px-3 py-1.5 bg-brandPurple hover:bg-purple-800 text-white text-xs font-medium rounded-lg shadow-xs flex items-center gap-1.5 transition-colors">
-              <i class="fa-solid fa-camera"></i> Subir nueva foto
-            </button>
+            <div class="flex gap-2">
+              <button id="uploadPhotoBtn" type="button" class="px-3 py-1.5 bg-brandPurple hover:bg-purple-800 text-white text-xs font-medium rounded-lg shadow-xs flex items-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-camera"></i> Cambiar foto
+              </button>
+              <button id="resetPhotoBtn" type="button" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium rounded-lg transition-colors" title="Restaurar foto original">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
           </div>
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-gray-700 mb-1">Nombres</label>
-          <input id="inputFirstName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none uppercase font-semibold" placeholder="LEONARDO VALENTIN" />
+          <input id="inputFirstName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none uppercase font-semibold text-slate-800" placeholder="LEONARDO VALENTIN" />
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-gray-700 mb-1">Apellidos</label>
-          <input id="inputLastName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none uppercase font-semibold" placeholder="HUAMANI ROMERO" />
+          <input id="inputLastName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none uppercase font-semibold text-slate-800" placeholder="HUAMANI ROMERO" />
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-gray-700 mb-1">Carrera / Programa</label>
-          <input id="inputCareer" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none" placeholder="Adm. y Negoc. Internacionales" />
+          <input id="inputCareer" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none text-slate-800" placeholder="Adm. y Negoc. Internacionales" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">Modalidad</label>
-            <input id="inputLevel" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none" placeholder="Pregrado" />
+            <input id="inputLevel" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none text-slate-800" placeholder="Pregrado" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">Estado</label>
-            <select id="inputStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none">
+            <select id="inputStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none text-slate-800 bg-white">
               <option value="ACTIVO">ACTIVO</option>
               <option value="INACTIVO">INACTIVO</option>
               <option value="EGRESADO">EGRESADO</option>
@@ -282,12 +541,12 @@
 
         <div>
           <label class="block text-xs font-semibold text-gray-700 mb-1">Código de Alumno (Código de Barras)</label>
-          <input id="inputCode" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none font-mono" placeholder="N00409105" />
+          <input id="inputCode" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none font-mono text-slate-800" placeholder="N00409105" />
         </div>
 
-        <div class="bg-amber-50 p-2.5 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+        <div class="bg-amber-50 p-2.5 rounded-lg text-xs text-amber-800 flex items-start gap-2 border border-amber-200/50">
           <i class="fa-solid fa-clock text-amber-600 mt-0.5"></i>
-          <span>La <strong>hora y fecha</strong> se actualizan automáticamente en tiempo real con la hora del dispositivo.</span>
+          <span>La <strong>hora y fecha</strong> siempre se actualizan automáticamente en tiempo real con la hora del dispositivo.</span>
         </div>
 
       </div>

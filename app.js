@@ -19,11 +19,12 @@ const MONTH_NAMES_ES = [
 let studentData = { ...DEFAULT_DATA };
 let deferredPrompt = null;
 
-// Initialize
+// Initialize App
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
-  renderCard();
+  renderAllViews();
   startClockAndDate();
+  setupNavigation();
   setupEventListeners();
   registerServiceWorker();
   setupPWAInstall();
@@ -50,8 +51,28 @@ function saveData() {
   }
 }
 
-// Render Card Content
-function renderCard() {
+// Render data across both Home and Credential Screens
+function renderAllViews() {
+  // 1. Home Profile Card & Preview
+  const homeUserName = document.getElementById('homeUserName');
+  const homeUserCareer = document.getElementById('homeUserCareer');
+  const homeUserAvatar = document.getElementById('homeUserAvatar');
+  const homeUserCode = document.getElementById('homeUserCode');
+
+  if (homeUserName) {
+    homeUserName.textContent = `${studentData.firstName} ${studentData.lastName}`;
+  }
+  if (homeUserCareer) {
+    homeUserCareer.textContent = studentData.career;
+  }
+  if (homeUserAvatar) {
+    homeUserAvatar.src = studentData.photoUrl || 'assets/avatar.png';
+  }
+  if (homeUserCode) {
+    homeUserCode.textContent = `Código: ${studentData.studentCode || 'N00409105'}`;
+  }
+
+  // 2. ID Card View
   const nameEl = document.getElementById('studentName');
   const careerEl = document.getElementById('studentCareer');
   const levelEl = document.getElementById('studentLevel');
@@ -78,18 +99,18 @@ function renderCard() {
   // Status badge styling
   if (statusBadge) {
     if (studentData.status.toUpperCase() === 'ACTIVO') {
-      statusBadge.className = 'bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-4 shadow-xs text-[13px] tracking-wide';
-      statusBadge.querySelector('i').className = 'fa-solid fa-circle-check text-xs';
+      statusBadge.className = 'bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
+      statusBadge.querySelector('i').className = 'fa-solid fa-circle-check';
     } else {
-      statusBadge.className = 'bg-red-100 text-red-700 font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-4 shadow-xs text-[13px] tracking-wide';
-      statusBadge.querySelector('i').className = 'fa-solid fa-circle-xmark text-xs';
+      statusBadge.className = 'bg-red-100 text-red-700 font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
+      statusBadge.querySelector('i').className = 'fa-solid fa-circle-xmark';
     }
   }
 
   renderBarcode(studentData.studentCode || 'N00409105');
 }
 
-// Render barcode (crisp SVG)
+// Render barcode (JsBarcode SVG with fallback)
 function renderBarcode(code) {
   const barcodeSvg = document.getElementById('barcodeSvg');
   if (!barcodeSvg) return;
@@ -99,7 +120,7 @@ function renderBarcode(code) {
       JsBarcode('#barcodeSvg', code, {
         format: 'CODE128',
         lineColor: '#000000',
-        width: 2.2,
+        width: 2.3,
         height: 48,
         displayValue: false,
         margin: 0,
@@ -111,18 +132,11 @@ function renderBarcode(code) {
     }
   }
 
-  // Standalone fallback SVG barcode pattern
   renderFallbackBarcode(barcodeSvg, code);
 }
 
-// Deterministic fallback barcode generator in case CDN is unreachable offline
+// Fallback barcode SVG
 function renderFallbackBarcode(svg, text) {
-  let hash = 0;
-  for (let i = 0; i < text.length; i++) {
-    hash = (hash * 31 + text.charCodeAt(i)) & 0xffffffff;
-  }
-
-  // Pre-determined realistic barcode bar sequence
   const pattern = [
     3, 1, 4, 1, 2, 3, 1, 4, 1, 2, 2, 4, 1, 3, 1, 4, 2, 2, 1, 3,
     2, 4, 1, 3, 1, 2, 4, 1, 2, 3, 1, 4, 1, 2, 2, 4, 1, 3, 2, 4,
@@ -140,6 +154,56 @@ function renderFallbackBarcode(svg, text) {
   }
   svg.setAttribute('viewBox', `0 0 ${Math.ceil(x + 4)} 48`);
   svg.innerHTML = svgContent;
+}
+
+// Navigation between Home and Credential
+function setupNavigation() {
+  const homeScreen = document.getElementById('homeScreen');
+  const credentialScreen = document.getElementById('credentialScreen');
+  const openUpnBtn = document.getElementById('openUpnCard');
+  const upnBackBtn = document.getElementById('upnBackBtn');
+
+  function showHome(pushHistory = true) {
+    credentialScreen.classList.add('screen-hidden');
+    homeScreen.classList.remove('screen-hidden');
+    window.scrollTo(0, 0);
+    if (pushHistory) {
+      history.pushState({ screen: 'home' }, '', '#home');
+    }
+  }
+
+  function showCredential(pushHistory = true) {
+    homeScreen.classList.add('screen-hidden');
+    credentialScreen.classList.remove('screen-hidden');
+    window.scrollTo(0, 0);
+    if (pushHistory) {
+      history.pushState({ screen: 'credential' }, '', '#upn');
+    }
+  }
+
+  if (openUpnBtn) {
+    openUpnBtn.addEventListener('click', () => showCredential(true));
+  }
+
+  if (upnBackBtn) {
+    upnBackBtn.addEventListener('click', () => showHome(true));
+  }
+
+  // Handle browser / mobile back button
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.screen === 'credential') {
+      showCredential(false);
+    } else {
+      showHome(false);
+    }
+  });
+
+  // Check initial hash
+  if (window.location.hash === '#upn') {
+    showCredential(false);
+  } else {
+    showHome(false);
+  }
 }
 
 // Live real-time Clock & Spanish Date of Today
@@ -173,34 +237,22 @@ function startClockAndDate() {
   setInterval(update, 1000);
 }
 
-// Event Listeners for Modal & Customization
+// Event Listeners for Configuration & Modal
 function setupEventListeners() {
   const modal = document.getElementById('editModal');
-  const openBtn = document.getElementById('openEditBtn');
+  const homeEditBtn = document.getElementById('homeEditBtn');
   const closeBtn = document.getElementById('closeEditBtn');
   const cancelBtn = document.getElementById('cancelEditBtn');
   const saveBtn = document.getElementById('saveEditBtn');
   const resetBtn = document.getElementById('resetDefaultBtn');
   const photoInput = document.getElementById('photoInput');
   const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
-  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  const resetPhotoBtn = document.getElementById('resetPhotoBtn');
+  const homeFullscreenBtn = document.getElementById('homeFullscreenBtn');
 
-  // Open modal
-  if (openBtn) {
-    openBtn.addEventListener('click', openModal);
-  }
-
-  // Also double click or long press card to open modal
-  const cardElement = document.getElementById('idCard');
-  if (cardElement) {
-    let timer = null;
-    cardElement.addEventListener('dblclick', openModal);
-    cardElement.addEventListener('touchstart', () => {
-      timer = setTimeout(openModal, 1200);
-    });
-    cardElement.addEventListener('touchend', () => {
-      if (timer) clearTimeout(timer);
-    });
+  // Open modal from Home Screen
+  if (homeEditBtn) {
+    homeEditBtn.addEventListener('click', openModal);
   }
 
   // Close modal
@@ -225,9 +277,9 @@ function setupEventListeners() {
       studentData.studentCode = document.getElementById('inputCode').value.trim() || DEFAULT_DATA.studentCode;
 
       saveData();
-      renderCard();
+      renderAllViews();
       closeModal();
-      showToast('¡Datos guardados correctamente!');
+      showToast('¡Datos actualizados con éxito!');
     });
   }
 
@@ -237,7 +289,7 @@ function setupEventListeners() {
       if (confirm('¿Restablecer todos los datos originales de Leonardo Valentin?')) {
         studentData = { ...DEFAULT_DATA };
         saveData();
-        renderCard();
+        renderAllViews();
         populateModalForm();
         closeModal();
         showToast('Valores restablecidos a los originales');
@@ -255,7 +307,6 @@ function setupEventListeners() {
 
       const reader = new FileReader();
       reader.onload = (event) => {
-        // Compress & resize image to maintain fast local storage performance
         compressImage(event.target.result, 360, 360, (compressedBase64) => {
           studentData.photoUrl = compressedBase64;
           document.getElementById('modalPhotoPreview').src = compressedBase64;
@@ -265,9 +316,18 @@ function setupEventListeners() {
     });
   }
 
-  // Fullscreen button
-  if (fullscreenBtn) {
-    fullscreenBtn.addEventListener('click', toggleFullScreen);
+  // Reset photo only
+  if (resetPhotoBtn) {
+    resetPhotoBtn.addEventListener('click', () => {
+      studentData.photoUrl = 'assets/avatar.png';
+      document.getElementById('modalPhotoPreview').src = 'assets/avatar.png';
+      showToast('Foto restablecida');
+    });
+  }
+
+  // Fullscreen button on Home Screen
+  if (homeFullscreenBtn) {
+    homeFullscreenBtn.addEventListener('click', toggleFullScreen);
   }
 }
 
@@ -340,7 +400,7 @@ function showToast(message) {
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'appToast';
-    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg z-50 transition-opacity duration-300 opacity-0 pointer-events-none';
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg z-50 transition-opacity duration-300 opacity-0 pointer-events-none';
     document.body.appendChild(toast);
   }
   toast.textContent = message;
