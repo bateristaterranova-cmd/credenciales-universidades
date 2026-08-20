@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>ID Card - Carné Digital</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ID Card" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Tailwind CSS & JsBarcode -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandYellow: '#f7a81b',
+            brandPurple: '#791bd0',
+            brandGreen: '#b8e6c7',
+            textGreen: '#1b7d3f'
+          },
+          fontFamily: {
+            anton: ['Anton', 'sans-serif'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Styling for High Fidelity */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7a81b;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
+    }
+
+    .font-anton {
+      font-family: 'Anton', sans-serif;
+    }
+
+    .bg-texture-yellow {
+      background-color: #f7a81b;
+      position: relative;
+    }
+
+    /* Subtle texture noise overlay */
+    .noise-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.07;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .purple-text {
+      color: #791bd0;
+    }
+
+    /* Dashed separator */
+    .dashed-divider {
+      border-top: 1px dashed #d6d9dc;
+    }
+
+    /* Barcode styling */
+    #barcodeSvg {
+      width: 100%;
+      height: 48px;
+      max-width: 270px;
+    }
+
+    /* Safe Area insets */
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white selection:bg-brandPurple selection:text-white antialiased">
+
+  <!-- TOP HEADER -->
+  <header class="bg-white px-4 py-3.5 flex items-center justify-between shadow-xs sticky top-0 z-30 safe-top">
+    <div class="flex items-center gap-3">
+      <button aria-label="Atrás" class="text-brandYellow p-1.5 -ml-1 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none">
+        <i class="fa-solid fa-chevron-left text-xl"></i>
+      </button>
+      <h1 class="text-[21px] font-anton text-black tracking-wider uppercase">ID CARD</h1>
+    </div>
+
+    <!-- Quick action buttons -->
+    <div class="flex items-center gap-2">
+      <button id="pwaInstallBtn" title="Instalar App" class="hidden text-brandPurple bg-purple-50 hover:bg-purple-100 p-2 rounded-full text-sm font-semibold flex items-center gap-1.5 px-3 transition-colors">
+        <i class="fa-solid fa-download"></i>
+        <span class="text-xs">Instalar</span>
+      </button>
+      <button id="fullscreenBtn" title="Pantalla Completa" class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
+        <i class="fa-solid fa-expand text-sm"></i>
+      </button>
+      <button id="openEditBtn" title="Personalizar Datos" class="text-gray-400 hover:text-brandPurple p-2 rounded-full hover:bg-purple-50 transition-colors">
+        <i class="fa-solid fa-sliders text-base"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT WITH VIBRANT YELLOW CANVAS & STRIPES -->
+  <main class="flex-1 bg-texture-yellow relative flex flex-col items-center justify-start px-4 pt-20 pb-10 overflow-hidden">
+    <div class="noise-overlay"></div>
+
+    <!-- DECORATIVE VERTICAL BOTTOM STRIPES (Exact Match to Screenshot) -->
+    <div class="absolute bottom-0 left-0 right-0 h-32 flex justify-between px-7 items-end pointer-events-none z-0">
+      <!-- Group 1: Black-Yellow-Black -->
+      <div class="flex h-32 w-10 justify-between">
+        <div class="w-4 h-full bg-black"></div>
+        <div class="w-1.5 h-full bg-brandYellow"></div>
+        <div class="w-4 h-full bg-black"></div>
+      </div>
+
+      <!-- Group 2: White-Yellow-White -->
+      <div class="flex h-32 w-8 justify-between">
+        <div class="w-3.5 h-full bg-white"></div>
+        <div class="w-1.5 h-full bg-brandYellow"></div>
+        <div class="w-2 h-full bg-white"></div>
+      </div>
+
+      <!-- Group 3: Black-Yellow-Black -->
+      <div class="flex h-32 w-10 justify-between">
+        <div class="w-4 h-full bg-black"></div>
+        <div class="w-1.5 h-full bg-brandYellow"></div>
+        <div class="w-4 h-full bg-black"></div>
+      </div>
+
+      <!-- Group 4: White-Yellow-White -->
+      <div class="flex h-32 w-8 justify-between">
+        <div class="w-3.5 h-full bg-white"></div>
+        <div class="w-1.5 h-full bg-brandYellow"></div>
+        <div class="w-2 h-full bg-white"></div>
+      </div>
+    </div>
+
+    <!-- WHITE FLOATING ID CARD -->
+    <article id="idCard" class="bg-white rounded-[26px] w-full max-w-[344px] shadow-[0_12px_32px_rgba(0,0,0,0.12)] relative pt-16 pb-6 px-6 flex flex-col items-center z-10 mt-2 mb-4 transition-all">
+      
+      <!-- PROFILE AVATAR (Overlapping top edge) -->
+      <div class="absolute -top-[65px] left-1/2 transform -translate-x-1/2 w-[128px] h-[128px] rounded-full border-[2.5px] border-brandYellow shadow-md overflow-hidden bg-white z-20 flex items-center justify-center">
+        <img id="studentPhoto" alt="Foto de Perfil" class="w-full h-full object-cover" src="assets/avatar.png" />
+      </div>
+
+      <!-- STATUS BADGE -->
+      <div id="statusBadge" class="bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-4 mt-2 shadow-xs text-[13px] tracking-wide">
+        <i class="fa-solid fa-circle-check text-xs"></i>
+        <span id="studentStatus">ACTIVO</span>
+      </div>
+
+      <!-- STUDENT NAME (2 lines in purple Anton) -->
+      <h2 id="studentName" class="font-anton text-[29px] text-center purple-text leading-[1.08] mb-3.5 uppercase tracking-wide">
+        LEONARDO VALENTIN<br />HUAMANI ROMERO
+      </h2>
+
+      <!-- MAJOR / DEGREE -->
+      <p id="studentCareer" class="text-[17.5px] font-bold text-black text-center mb-2 leading-snug">
+        Adm. y Negoc. Internacionales
+      </p>
+
+      <!-- MODALITY / LEVEL -->
+      <div class="flex items-center justify-center gap-1.5 text-black mb-5">
+        <span class="text-base">🎓</span>
+        <span id="studentLevel" class="text-[15px] font-medium">Pregrado</span>
+      </div>
+
+      <!-- DASHED DIVIDER -->
+      <div class="w-[110%] -ml-[5%] dashed-divider mb-5"></div>
+
+      <!-- DYNAMIC LIVE CLOCK (HH:MM:SS) -->
+      <div id="liveClock" class="font-anton text-[42px] purple-text my-2 tracking-wider leading-none">
+        12:33:56
+      </div>
+
+      <!-- BARCODE AREA (JsBarcode SVG) -->
+      <div class="w-full my-3 px-1 flex justify-center items-center">
+        <svg id="barcodeSvg" class="h-12 w-full max-w-[268px]"></svg>
+      </div>
+
+      <!-- CURRENT LIVE DATE OF TODAY IN SPANISH -->
+      <p id="currentDate" class="text-[#222222] text-[15px] font-normal mt-2">
+        20 agosto 2026
+      </p>
+    </article>
+
+  </main>
+
+  <!-- SAFE BOTTOM AREA FOR MOBILE GESTURE BAR -->
+  <div class="h-4 bg-brandYellow w-full safe-bottom"></div>
+
+  <!-- EDIT / CUSTOMIZATION MODAL (Accessible via settings icon or double tap) -->
+  <div id="editModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 overflow-y-auto max-h-[92vh] animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center pb-3 border-b border-gray-100 mb-4">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-id-card text-brandPurple"></i>
+          Personalizar Carné Digital
+        </h3>
+        <button id="closeEditBtn" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <div class="space-y-4 text-sm">
+        
+        <!-- Photo Preview & Upload -->
+        <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
+          <img id="modalPhotoPreview" src="assets/avatar.png" class="w-16 h-16 rounded-full border-2 border-brandYellow object-cover bg-white" alt="Preview" />
+          <div class="flex-1">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Foto de Perfil</label>
+            <input type="file" id="photoInput" accept="image/*" class="hidden" />
+            <button id="uploadPhotoBtn" type="button" class="px-3 py-1.5 bg-brandPurple hover:bg-purple-800 text-white text-xs font-medium rounded-lg shadow-xs flex items-center gap-1.5 transition-colors">
+              <i class="fa-solid fa-camera"></i> Subir nueva foto
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Nombres</label>
+          <input id="inputFirstName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none uppercase font-semibold" placeholder="LEONARDO VALENTIN" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Apellidos</label>
+          <input id="inputLastName" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none uppercase font-semibold" placeholder="HUAMANI ROMERO" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Carrera / Programa</label>
+          <input id="inputCareer" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none" placeholder="Adm. y Negoc. Internacionales" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Modalidad</label>
+            <input id="inputLevel" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none" placeholder="Pregrado" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Estado</label>
+            <select id="inputStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none">
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+              <option value="EGRESADO">EGRESADO</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Código de Alumno (Código de Barras)</label>
+          <input id="inputCode" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brandPurple focus:border-transparent outline-none font-mono" placeholder="N00409105" />
+        </div>
+
+        <div class="bg-amber-50 p-2.5 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+          <i class="fa-solid fa-clock text-amber-600 mt-0.5"></i>
+          <span>La <strong>hora y fecha</strong> se actualizan automáticamente en tiempo real con la hora del dispositivo.</span>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between mt-6 pt-3 border-t border-gray-100">
+        <button id="resetDefaultBtn" type="button" class="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> Restablecer original
+        </button>
+        <div class="flex gap-2">
+          <button id="cancelEditBtn" type="button" class="px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button id="saveEditBtn" type="button" class="px-4 py-2 text-xs font-bold text-white bg-brandPurple hover:bg-purple-800 rounded-lg shadow-sm transition-colors">
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
