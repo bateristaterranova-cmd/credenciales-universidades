@@ -178,10 +178,11 @@
       display: none !important;
     }
 
-    /* 1.5s UPWARD RISING SPLIT-ARROWS ANIMATION */
-    .arrows-bg-layer {
+    /* 1.6s SMOOTH UPWARD STAIRCASE ARROWS ANIMATION */
+    .staircase-arrows-wrapper {
       position: absolute;
-      inset: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -189,44 +190,22 @@
       z-index: 1;
     }
 
-    .arrow-column {
+    .staircase-arrows-flight {
       position: absolute;
-      bottom: -110vh;
-      width: 38px;
-      height: 220vh;
+      top: 0;
+      left: 0;
+      width: 100%;
       will-change: transform;
-      animation: riseArrowUp 1.5s linear infinite;
+      animation: staircaseFlight 1.6s linear infinite;
     }
 
-    @keyframes riseArrowUp {
+    @keyframes staircaseFlight {
       0% {
-        transform: translateY(0);
-        opacity: 0.95;
-      }
-      85% {
-        opacity: 0.95;
+        transform: translateY(100vh);
       }
       100% {
-        transform: translateY(-135vh);
-        opacity: 0;
+        transform: translateY(-165%);
       }
-    }
-
-    .arrow-col-1 {
-      left: 6%;
-      animation-delay: 0.38s;
-    }
-    .arrow-col-2 {
-      left: 31%;
-      animation-delay: 0.25s;
-    }
-    .arrow-col-3 {
-      left: 58%;
-      animation-delay: 0.12s;
-    }
-    .arrow-col-4 {
-      left: 81%;
-      animation-delay: 0s;
     }
   </style>
 </head>
@@ -415,37 +394,22 @@
     <main class="flex-grow bg-texture-yellow relative px-4.5 pt-20 pb-8 flex flex-col items-center justify-start overflow-y-auto">
       <div class="noise-overlay"></div>
 
-      <!-- ANIMATED UPWARD CHEVRON ARROWS LAYER (1.5s DURATION) -->
-      <div id="arrowsBackground" class="arrows-bg-layer">
-        <!-- Lane 1: Black Split Arrow -->
-        <div class="arrow-column arrow-col-1 text-black">
-          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
-            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
-          </svg>
-        </div>
-
-        <!-- Lane 2: White Split Arrow -->
-        <div class="arrow-column arrow-col-2 text-white">
-          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
-            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
-          </svg>
-        </div>
-
-        <!-- Lane 3: Black Split Arrow -->
-        <div class="arrow-column arrow-col-3 text-black">
-          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
-            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
-          </svg>
-        </div>
-
-        <!-- Lane 4: White Split Arrow -->
-        <div class="arrow-column arrow-col-4 text-white">
-          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
-            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
+      <!-- ANIMATED STAIRCASE ARROWS LAYER (1.6s UNIFIED FLIGHT) -->
+      <div id="arrowsBackground" class="staircase-arrows-wrapper">
+        <div class="staircase-arrows-flight">
+          <svg viewBox="0 0 480 2200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <!-- Lane 1 (Black, Leftmost, Lowest) -->
+            <path d="M 59 398 L 49 390 L 13 450 L 27 462 L 41 442 L 41 2590 L 59 2590 Z" fill="#000000"/>
+            <path d="M 71 398 L 81 390 L 117 450 L 103 462 L 89 442 L 89 2590 L 71 2590 Z" fill="#000000"/>
+            <!-- Lane 2 (White, Center-Left) -->
+            <path d="M 174 268 L 164 260 L 128 320 L 142 332 L 156 312 L 156 2460 L 174 2460 Z" fill="#ffffff"/>
+            <path d="M 186 268 L 196 260 L 232 320 L 218 332 L 204 312 L 204 2460 L 186 2460 Z" fill="#ffffff"/>
+            <!-- Lane 3 (Black, Center-Right) -->
+            <path d="M 289 138 L 279 130 L 243 190 L 257 202 L 271 182 L 271 2330 L 289 2330 Z" fill="#000000"/>
+            <path d="M 301 138 L 311 130 L 347 190 L 333 202 L 319 182 L 319 2330 L 301 2330 Z" fill="#000000"/>
+            <!-- Lane 4 (White, Rightmost, Highest - Leads the Staircase) -->
+            <path d="M 404 8 L 394 0 L 358 60 L 372 72 L 386 52 L 386 2200 L 404 2200 Z" fill="#ffffff"/>
+            <path d="M 416 8 L 426 0 L 462 60 L 448 72 L 434 52 L 434 2200 L 416 2200 Z" fill="#ffffff"/>
           </svg>
         </div>
       </div>
