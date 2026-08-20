@@ -96,29 +96,23 @@ window.closeModal = function(e) {
   }
 };
 
-// Global Toggle for Vertical Stripes (Con / Sin Franjas)
+// Global Toggle for Vertical Animation / Stripes (Con / Sin Animación)
 window.toggleStripes = function(enabled) {
   studentData.showStripes = enabled;
   saveData();
   updateStripesView();
-  showToast(enabled ? 'Franjas activadas' : 'Franjas ocultadas');
+  showToast(enabled ? 'Animación activada' : 'Animación ocultada');
 };
 
 function updateStripesView() {
-  const bottomStripes = document.getElementById('bottomStripes');
+  const arrowsBg = document.getElementById('arrowsBackground');
   const toggleInput = document.getElementById('toggleStripesInput');
   const statusLabel = document.getElementById('stripesStatusLabel');
 
   const isEnabled = studentData.showStripes !== false; // default true
 
-  if (bottomStripes) {
-    if (isEnabled) {
-      bottomStripes.style.removeProperty('display');
-      bottomStripes.classList.remove('hidden');
-    } else {
-      bottomStripes.style.setProperty('display', 'none', 'important');
-      bottomStripes.classList.add('hidden');
-    }
+  if (arrowsBg) {
+    arrowsBg.style.display = isEnabled ? 'block' : 'none';
   }
 
   if (toggleInput) {
@@ -126,7 +120,7 @@ function updateStripesView() {
   }
 
   if (statusLabel) {
-    statusLabel.textContent = isEnabled ? 'Con franjas verticales' : 'Sin franjas (fondo liso)';
+    statusLabel.textContent = isEnabled ? 'Con animación de flechas (1.5s)' : 'Sin animación (fondo liso)';
   }
 }
 

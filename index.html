@@ -87,6 +87,28 @@
         }
       } catch (err) {}
     }
+
+    // Toggle animation/stripes inline handler
+    function toggleStripes(enabled) {
+      var bg = document.getElementById('arrowsBackground');
+      var lbl = document.getElementById('stripesStatusLabel');
+      var input = document.getElementById('toggleStripesInput');
+      if (bg) {
+        bg.style.display = enabled ? 'block' : 'none';
+      }
+      if (lbl) {
+        lbl.textContent = enabled ? 'Con animación de flechas (1.5s)' : 'Sin animación (fondo liso)';
+      }
+      if (input) {
+        input.checked = enabled;
+      }
+      try {
+        var saved = localStorage.getItem('credencial_student_data');
+        var data = saved ? JSON.parse(saved) : {};
+        data.showStripes = enabled;
+        localStorage.setItem('credencial_student_data', JSON.stringify(data));
+      } catch (e) {}
+    }
   </script>
 
   <style>
@@ -137,7 +159,7 @@
     #barcodeSvg {
       width: 100%;
       height: 48px;
-      max-width: 270px;
+      max-width: 285px;
     }
 
     /* Safe Area insets */
@@ -154,6 +176,57 @@
     }
     .screen-hidden {
       display: none !important;
+    }
+
+    /* 1.5s UPWARD RISING SPLIT-ARROWS ANIMATION */
+    .arrows-bg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .arrow-column {
+      position: absolute;
+      bottom: -110vh;
+      width: 38px;
+      height: 220vh;
+      will-change: transform;
+      animation: riseArrowUp 1.5s linear infinite;
+    }
+
+    @keyframes riseArrowUp {
+      0% {
+        transform: translateY(0);
+        opacity: 0.95;
+      }
+      85% {
+        opacity: 0.95;
+      }
+      100% {
+        transform: translateY(-135vh);
+        opacity: 0;
+      }
+    }
+
+    .arrow-col-1 {
+      left: 6%;
+      animation-delay: 0.38s;
+    }
+    .arrow-col-2 {
+      left: 31%;
+      animation-delay: 0.25s;
+    }
+    .arrow-col-3 {
+      left: 58%;
+      animation-delay: 0.12s;
+    }
+    .arrow-col-4 {
+      left: 81%;
+      animation-delay: 0s;
     }
   </style>
 </head>
@@ -194,7 +267,7 @@
       <!-- Student Profile Card with Edit Button -->
       <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="relative">
+          <div class="relative cursor-pointer" onclick="openModal()">
             <img id="homeUserAvatar" src="assets/avatar.png" class="w-14 h-14 rounded-full border-2 border-brandYellow object-cover shadow-xs bg-white" alt="Avatar" />
             <span class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></span>
           </div>
@@ -280,15 +353,15 @@
 
       </div>
 
-      <!-- VISUAL OPTIONS: TOGGLE CON/SIN FRANJAS -->
+      <!-- VISUAL OPTIONS: TOGGLE CON/SIN FLECHAS ANIMADAS -->
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-brandYellow">
-            <i class="fa-solid fa-bars-staggered text-base"></i>
+            <i class="fa-solid fa-arrows-up-to-line text-base"></i>
           </div>
           <div>
-            <div class="text-sm font-bold text-slate-900 leading-tight">Franjas inferiores</div>
-            <p id="stripesStatusLabel" class="text-xs text-slate-500 mt-0.5">Con franjas verticales</p>
+            <div class="text-sm font-bold text-slate-900 leading-tight">Fondo animado (Flechas)</div>
+            <p id="stripesStatusLabel" class="text-xs text-slate-500 mt-0.5">Con animación de flechas (1.5s)</p>
           </div>
         </div>
 
@@ -342,31 +415,38 @@
     <main class="flex-grow bg-texture-yellow relative px-4.5 pt-20 pb-8 flex flex-col items-center justify-start overflow-y-auto">
       <div class="noise-overlay"></div>
 
-      <!-- FIXED BOTTOM VERTICAL STRIPES (TRACKS) -->
-      <div id="bottomStripes" class="absolute bottom-0 left-0 right-0 h-32 flex justify-between px-6 items-end pointer-events-none z-0">
-        <!-- Group 1: Black-Yellow-Black -->
-        <div class="flex h-32 w-10 justify-between">
-          <div class="w-4 h-full bg-black"></div>
-          <div class="w-1.5 h-full bg-brandYellow"></div>
-          <div class="w-4 h-full bg-black"></div>
+      <!-- ANIMATED UPWARD CHEVRON ARROWS LAYER (1.5s DURATION) -->
+      <div id="arrowsBackground" class="arrows-bg-layer">
+        <!-- Lane 1: Black Split Arrow -->
+        <div class="arrow-column arrow-col-1 text-black">
+          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
+            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
+          </svg>
         </div>
-        <!-- Group 2: White-Yellow-White -->
-        <div class="flex h-32 w-8 justify-between">
-          <div class="w-4 h-full bg-white"></div>
-          <div class="w-1.5 h-full bg-brandYellow"></div>
-          <div class="w-2 h-full bg-white"></div>
+
+        <!-- Lane 2: White Split Arrow -->
+        <div class="arrow-column arrow-col-2 text-white">
+          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
+            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
+          </svg>
         </div>
-        <!-- Group 3: Black-Yellow-Black -->
-        <div class="flex h-32 w-10 justify-between">
-          <div class="w-4 h-full bg-black"></div>
-          <div class="w-1.5 h-full bg-brandYellow"></div>
-          <div class="w-4 h-full bg-black"></div>
+
+        <!-- Lane 3: Black Split Arrow -->
+        <div class="arrow-column arrow-col-3 text-black">
+          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
+            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
+          </svg>
         </div>
-        <!-- Group 4: White-Yellow-White -->
-        <div class="flex h-32 w-8 justify-between">
-          <div class="w-4 h-full bg-white"></div>
-          <div class="w-1.5 h-full bg-brandYellow"></div>
-          <div class="w-2 h-full bg-white"></div>
+
+        <!-- Lane 4: White Split Arrow -->
+        <div class="arrow-column arrow-col-4 text-white">
+          <svg width="38" height="2000" viewBox="0 0 38 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 17 18 L 17 2000 L 10 2000 L 10 32 L 2 40 L 0 35 L 17 10 Z" fill="currentColor"/>
+            <path d="M 21 18 L 21 2000 L 28 2000 L 28 32 L 36 40 L 38 35 L 21 10 Z" fill="currentColor"/>
+          </svg>
         </div>
       </div>
 
