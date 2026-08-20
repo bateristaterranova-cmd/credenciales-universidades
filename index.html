@@ -45,6 +45,50 @@
     }
   </script>
 
+  <script>
+    // Immediate inline navigation fallback
+    function showCredentialScreen(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      var home = document.getElementById('homeScreen');
+      var cred = document.getElementById('credentialScreen');
+      if (home) home.style.setProperty('display', 'none', 'important');
+      if (cred) {
+        cred.style.removeProperty('display');
+        cred.classList.remove('screen-hidden');
+      }
+      window.scrollTo(0, 0);
+      try {
+        if (window.location.protocol.startsWith('http')) {
+          history.pushState({ screen: 'credential' }, '', '#upn');
+        } else {
+          window.location.hash = '#upn';
+        }
+      } catch (err) {}
+    }
+
+    function showHomeScreen(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      var home = document.getElementById('homeScreen');
+      var cred = document.getElementById('credentialScreen');
+      if (cred) {
+        cred.style.setProperty('display', 'none', 'important');
+        cred.classList.add('screen-hidden');
+      }
+      if (home) {
+        home.style.removeProperty('display');
+        home.classList.remove('screen-hidden');
+      }
+      window.scrollTo(0, 0);
+      try {
+        if (window.location.protocol.startsWith('http')) {
+          history.pushState({ screen: 'home' }, '', '#home');
+        } else {
+          window.location.hash = '#home';
+        }
+      } catch (err) {}
+    }
+  </script>
+
   <style>
     * {
       -webkit-tap-highlight-color: transparent;
@@ -257,9 +301,9 @@
         </div>
 
         <!-- UPN CARD (Active & Featured) -->
-        <div id="openUpnCard" onclick="showCredentialScreen()" role="button" tabindex="0" class="group bg-white rounded-2xl overflow-hidden border-2 border-amber-300 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative select-none">
+        <div id="openUpnCard" onclick="showCredentialScreen(event)" role="button" tabindex="0" class="group bg-white rounded-2xl overflow-hidden border-2 border-amber-300 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative select-none">
           <!-- Card Banner -->
-          <div class="bg-[#f7a81b] p-4 flex items-center justify-between relative overflow-hidden pointer-events-none">
+          <div class="bg-[#f7a81b] p-4 flex items-center justify-between relative overflow-hidden">
             <div class="z-10 flex items-center gap-3">
               <div class="bg-black text-white font-anton text-sm tracking-wider px-2.5 py-1 rounded-md">
                 UPN
@@ -275,7 +319,7 @@
           </div>
 
           <!-- Card Body Preview -->
-          <div class="p-4 flex items-center justify-between bg-white pointer-events-none">
+          <div class="p-4 flex items-center justify-between bg-white">
             <div class="space-y-1">
               <div class="text-xs text-slate-400 font-medium">Formato de carné:</div>
               <div class="text-sm font-semibold text-slate-800 flex items-center gap-2">
@@ -285,10 +329,10 @@
               <div class="text-xs text-slate-500 font-mono" id="homeUserCode">Código: N00409105</div>
             </div>
             
-            <div class="flex items-center gap-2 bg-brandPurple group-hover:bg-purple-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-colors">
+            <button type="button" onclick="showCredentialScreen(event)" class="flex items-center gap-2 bg-brandPurple hover:bg-purple-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer active:scale-95">
               <span>Abrir Carné</span>
               <i class="fa-solid fa-arrow-right"></i>
-            </div>
+            </button>
           </div>
         </div>
 

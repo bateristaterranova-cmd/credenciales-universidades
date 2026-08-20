@@ -19,34 +19,65 @@ const MONTH_NAMES_ES = [
 let studentData = { ...DEFAULT_DATA };
 let deferredPrompt = null;
 
-// Global Navigation Functions
-window.showCredentialScreen = function(pushHistory = true) {
+// Safe pushState for both http/https and file:/// protocols
+function safePushState(state, title, hash) {
+  try {
+    if (window.location.protocol.startsWith('http')) {
+      history.pushState(state, title, hash);
+    } else {
+      window.location.hash = hash;
+    }
+  } catch (e) {
+    console.warn('pushState not supported in current environment', e);
+  }
+}
+
+// Global Navigation Functions (Guaranteed to work in any environment)
+window.showCredentialScreen = function(e, pushHistory = true) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  
   const homeScreen = document.getElementById('homeScreen');
   const credentialScreen = document.getElementById('credentialScreen');
-  if (homeScreen && credentialScreen) {
-    homeScreen.classList.add('screen-hidden');
+  
+  if (homeScreen) {
+    homeScreen.style.setProperty('display', 'none', 'important');
+  }
+  if (credentialScreen) {
+    credentialScreen.style.removeProperty('display');
     credentialScreen.classList.remove('screen-hidden');
-    window.scrollTo(0, 0);
-    if (pushHistory) {
-      history.pushState({ screen: 'credential' }, '', '#upn');
-    }
+  }
+  
+  window.scrollTo(0, 0);
+  
+  if (pushHistory) {
+    safePushState({ screen: 'credential' }, '', '#upn');
   }
 };
 
-window.showHomeScreen = function(pushHistory = true) {
+window.showHomeScreen = function(e, pushHistory = true) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  
   const homeScreen = document.getElementById('homeScreen');
   const credentialScreen = document.getElementById('credentialScreen');
-  if (homeScreen && credentialScreen) {
+  
+  if (credentialScreen) {
+    credentialScreen.style.setProperty('display', 'none', 'important');
     credentialScreen.classList.add('screen-hidden');
+  }
+  if (homeScreen) {
+    homeScreen.style.removeProperty('display');
     homeScreen.classList.remove('screen-hidden');
-    window.scrollTo(0, 0);
-    if (pushHistory) {
-      history.pushState({ screen: 'home' }, '', '#home');
-    }
+  }
+  
+  window.scrollTo(0, 0);
+  
+  if (pushHistory) {
+    safePushState({ screen: 'home' }, '', '#home');
   }
 };
 
-window.openModal = function() {
+window.openModal = function(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
   populateModalForm();
   const modal = document.getElementById('editModal');
   if (modal) {
@@ -55,7 +86,8 @@ window.openModal = function() {
   }
 };
 
-window.closeModal = function() {
+window.closeModal = function(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
   const modal = document.getElementById('editModal');
   if (modal) {
     modal.classList.add('hidden');
@@ -65,13 +97,17 @@ window.closeModal = function() {
 
 // Initialize App
 function initApp() {
-  loadData();
-  renderAllViews();
-  startClockAndDate();
-  setupNavigation();
-  setupEventListeners();
-  registerServiceWorker();
-  setupPWAInstall();
+  try {
+    loadData();
+    renderAllViews();
+    startClockAndDate();
+    setupNavigation();
+    setupEventListeners();
+    registerServiceWorker();
+    setupPWAInstall();
+  } catch (err) {
+    console.error('Error during initApp:', err);
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -103,63 +139,67 @@ function saveData() {
 
 // Render data across both Home and Credential Screens
 function renderAllViews() {
-  // 1. Home Profile Card & Preview
-  const homeUserName = document.getElementById('homeUserName');
-  const homeUserCareer = document.getElementById('homeUserCareer');
-  const homeUserAvatar = document.getElementById('homeUserAvatar');
-  const homeUserCode = document.getElementById('homeUserCode');
+  try {
+    // 1. Home Profile Card & Preview
+    const homeUserName = document.getElementById('homeUserName');
+    const homeUserCareer = document.getElementById('homeUserCareer');
+    const homeUserAvatar = document.getElementById('homeUserAvatar');
+    const homeUserCode = document.getElementById('homeUserCode');
 
-  if (homeUserName) {
-    homeUserName.textContent = `${studentData.firstName} ${studentData.lastName}`;
-  }
-  if (homeUserCareer) {
-    homeUserCareer.textContent = studentData.career;
-  }
-  if (homeUserAvatar) {
-    homeUserAvatar.src = studentData.photoUrl || 'assets/avatar.png';
-  }
-  if (homeUserCode) {
-    homeUserCode.textContent = `Código: ${studentData.studentCode || 'N00409105'}`;
-  }
-
-  // 2. ID Card View
-  const nameEl = document.getElementById('studentName');
-  const careerEl = document.getElementById('studentCareer');
-  const levelEl = document.getElementById('studentLevel');
-  const statusEl = document.getElementById('studentStatus');
-  const photoEl = document.getElementById('studentPhoto');
-  const statusBadge = document.getElementById('statusBadge');
-
-  if (nameEl) {
-    nameEl.innerHTML = `${escapeHtml(studentData.firstName)}<br/>${escapeHtml(studentData.lastName)}`;
-  }
-  if (careerEl) {
-    careerEl.textContent = studentData.career;
-  }
-  if (levelEl) {
-    levelEl.textContent = studentData.level;
-  }
-  if (statusEl) {
-    statusEl.textContent = studentData.status;
-  }
-  if (photoEl) {
-    photoEl.src = studentData.photoUrl || 'assets/avatar.png';
-  }
-
-  // Status badge styling
-  if (statusBadge) {
-    if (studentData.status.toUpperCase() === 'ACTIVO') {
-      statusBadge.className = 'bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
-      const icon = statusBadge.querySelector('i');
-      if (icon) icon.className = 'fa-solid fa-circle-check';
-    } else {
-      statusBadge.className = 'bg-red-100 text-red-700 font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
-      const icon = statusBadge.querySelector('i');
-      if (icon) icon.className = 'fa-solid fa-circle-xmark';
+    if (homeUserName) {
+      homeUserName.textContent = `${studentData.firstName} ${studentData.lastName}`;
     }
-  }
+    if (homeUserCareer) {
+      homeUserCareer.textContent = studentData.career;
+    }
+    if (homeUserAvatar) {
+      homeUserAvatar.src = studentData.photoUrl || 'assets/avatar.png';
+    }
+    if (homeUserCode) {
+      homeUserCode.textContent = `Código: ${studentData.studentCode || 'N00409105'}`;
+    }
 
-  renderBarcode(studentData.studentCode || 'N00409105');
+    // 2. ID Card View
+    const nameEl = document.getElementById('studentName');
+    const careerEl = document.getElementById('studentCareer');
+    const levelEl = document.getElementById('studentLevel');
+    const statusEl = document.getElementById('studentStatus');
+    const photoEl = document.getElementById('studentPhoto');
+    const statusBadge = document.getElementById('statusBadge');
+
+    if (nameEl) {
+      nameEl.innerHTML = `${escapeHtml(studentData.firstName)}<br/>${escapeHtml(studentData.lastName)}`;
+    }
+    if (careerEl) {
+      careerEl.textContent = studentData.career;
+    }
+    if (levelEl) {
+      levelEl.textContent = studentData.level;
+    }
+    if (statusEl) {
+      statusEl.textContent = studentData.status;
+    }
+    if (photoEl) {
+      photoEl.src = studentData.photoUrl || 'assets/avatar.png';
+    }
+
+    // Status badge styling
+    if (statusBadge) {
+      if (studentData.status.toUpperCase() === 'ACTIVO') {
+        statusBadge.className = 'bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
+        const icon = statusBadge.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-circle-check';
+      } else {
+        statusBadge.className = 'bg-red-100 text-red-700 font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
+        const icon = statusBadge.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-circle-xmark';
+      }
+    }
+
+    renderBarcode(studentData.studentCode || 'N00409105');
+  } catch (err) {
+    console.error('Error in renderAllViews:', err);
+  }
 }
 
 // Render barcode (JsBarcode SVG with fallback)
@@ -215,32 +255,28 @@ function setupNavigation() {
 
   if (openUpnBtn) {
     openUpnBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.showCredentialScreen(true);
+      window.showCredentialScreen(e, true);
     });
   }
 
   if (upnBackBtn) {
     upnBackBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.showHomeScreen(true);
+      window.showHomeScreen(e, true);
     });
   }
 
   // Handle browser / mobile back button
   window.addEventListener('popstate', (e) => {
     if (e.state && e.state.screen === 'credential') {
-      window.showCredentialScreen(false);
+      window.showCredentialScreen(null, false);
     } else {
-      window.showHomeScreen(false);
+      window.showHomeScreen(null, false);
     }
   });
 
   // Check initial hash
   if (window.location.hash === '#upn') {
-    window.showCredentialScreen(false);
-  } else {
-    window.showHomeScreen(false);
+    window.showCredentialScreen(null, false);
   }
 }
 
@@ -300,19 +336,19 @@ function setupEventListeners() {
   // Close on outside click
   if (modal) {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) window.closeModal();
+      if (e.target === modal) window.closeModal(e);
     });
   }
 
   // Save changes
   if (saveBtn) {
     saveBtn.addEventListener('click', () => {
-      studentData.firstName = document.getElementById('inputFirstName').value.trim() || DEFAULT_DATA.firstName;
-      studentData.lastName = document.getElementById('inputLastName').value.trim() || DEFAULT_DATA.lastName;
-      studentData.career = document.getElementById('inputCareer').value.trim() || DEFAULT_DATA.career;
-      studentData.level = document.getElementById('inputLevel').value.trim() || DEFAULT_DATA.level;
-      studentData.status = document.getElementById('inputStatus').value.trim() || DEFAULT_DATA.status;
-      studentData.studentCode = document.getElementById('inputCode').value.trim() || DEFAULT_DATA.studentCode;
+      studentData.firstName = (document.getElementById('inputFirstName')?.value || '').trim() || DEFAULT_DATA.firstName;
+      studentData.lastName = (document.getElementById('inputLastName')?.value || '').trim() || DEFAULT_DATA.lastName;
+      studentData.career = (document.getElementById('inputCareer')?.value || '').trim() || DEFAULT_DATA.career;
+      studentData.level = (document.getElementById('inputLevel')?.value || '').trim() || DEFAULT_DATA.level;
+      studentData.status = (document.getElementById('inputStatus')?.value || '').trim() || DEFAULT_DATA.status;
+      studentData.studentCode = (document.getElementById('inputCode')?.value || '').trim() || DEFAULT_DATA.studentCode;
 
       saveData();
       renderAllViews();
@@ -347,7 +383,8 @@ function setupEventListeners() {
       reader.onload = (event) => {
         compressImage(event.target.result, 360, 360, (compressedBase64) => {
           studentData.photoUrl = compressedBase64;
-          document.getElementById('modalPhotoPreview').src = compressedBase64;
+          const preview = document.getElementById('modalPhotoPreview');
+          if (preview) preview.src = compressedBase64;
         });
       };
       reader.readAsDataURL(file);
@@ -358,7 +395,8 @@ function setupEventListeners() {
   if (resetPhotoBtn) {
     resetPhotoBtn.addEventListener('click', () => {
       studentData.photoUrl = 'assets/avatar.png';
-      document.getElementById('modalPhotoPreview').src = 'assets/avatar.png';
+      const preview = document.getElementById('modalPhotoPreview');
+      if (preview) preview.src = 'assets/avatar.png';
       showToast('Foto restablecida');
     });
   }
@@ -445,7 +483,7 @@ function showToast(message) {
 // Escape HTML helper
 function escapeHtml(text) {
   if (!text) return '';
-  return text
+  return String(text)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -455,16 +493,20 @@ function escapeHtml(text) {
 
 // Register Service Worker
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('./sw.js')
-        .then((reg) => {
-          console.log('Service Worker registered:', reg.scope);
-          reg.update();
-        })
-        .catch((err) => console.log('Service Worker registration failed:', err));
-    });
+  try {
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('./sw.js')
+          .then((reg) => {
+            console.log('Service Worker registered:', reg.scope);
+            reg.update();
+          })
+          .catch((err) => console.log('Service Worker registration failed:', err));
+      });
+    }
+  } catch (e) {
+    console.warn('Service worker not registered:', e);
   }
 }
 
