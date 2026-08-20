@@ -1,4 +1,4 @@
-const CACHE_NAME = 'id-card-pwa-v1';
+const CACHE_NAME = 'credenciales-pwa-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -35,29 +35,38 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
+  // Network-First for HTML/JS so changes show up immediately, fallback to Cache
+  if (event.request.mode === 'navigate' || event.request.destination === 'document' || event.request.destination === 'script') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Cache-First for static assets (images, icons, fonts)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
       return fetch(event.request)
         .then((networkResponse) => {
           if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
             return networkResponse;
           }
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
           return networkResponse;
         })
-        .catch(() => {
-          // Offline fallback
-          return caches.match('./index.html');
-        });
+        .catch(() => caches.match('./index.html'));
     })
   );
 });

@@ -19,8 +19,52 @@ const MONTH_NAMES_ES = [
 let studentData = { ...DEFAULT_DATA };
 let deferredPrompt = null;
 
+// Global Navigation Functions
+window.showCredentialScreen = function(pushHistory = true) {
+  const homeScreen = document.getElementById('homeScreen');
+  const credentialScreen = document.getElementById('credentialScreen');
+  if (homeScreen && credentialScreen) {
+    homeScreen.classList.add('screen-hidden');
+    credentialScreen.classList.remove('screen-hidden');
+    window.scrollTo(0, 0);
+    if (pushHistory) {
+      history.pushState({ screen: 'credential' }, '', '#upn');
+    }
+  }
+};
+
+window.showHomeScreen = function(pushHistory = true) {
+  const homeScreen = document.getElementById('homeScreen');
+  const credentialScreen = document.getElementById('credentialScreen');
+  if (homeScreen && credentialScreen) {
+    credentialScreen.classList.add('screen-hidden');
+    homeScreen.classList.remove('screen-hidden');
+    window.scrollTo(0, 0);
+    if (pushHistory) {
+      history.pushState({ screen: 'home' }, '', '#home');
+    }
+  }
+};
+
+window.openModal = function() {
+  populateModalForm();
+  const modal = document.getElementById('editModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+};
+
+window.closeModal = function() {
+  const modal = document.getElementById('editModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+};
+
 // Initialize App
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   loadData();
   renderAllViews();
   startClockAndDate();
@@ -28,7 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   registerServiceWorker();
   setupPWAInstall();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Load data from LocalStorage
 function loadData() {
@@ -100,10 +150,12 @@ function renderAllViews() {
   if (statusBadge) {
     if (studentData.status.toUpperCase() === 'ACTIVO') {
       statusBadge.className = 'bg-brandGreen text-textGreen font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
-      statusBadge.querySelector('i').className = 'fa-solid fa-circle-check';
+      const icon = statusBadge.querySelector('i');
+      if (icon) icon.className = 'fa-solid fa-circle-check';
     } else {
       statusBadge.className = 'bg-red-100 text-red-700 font-bold px-3 py-1 rounded-md flex items-center gap-1.5 mb-6 mt-4 shadow-sm text-sm';
-      statusBadge.querySelector('i').className = 'fa-solid fa-circle-xmark';
+      const icon = statusBadge.querySelector('i');
+      if (icon) icon.className = 'fa-solid fa-circle-xmark';
     }
   }
 
@@ -156,53 +208,39 @@ function renderFallbackBarcode(svg, text) {
   svg.innerHTML = svgContent;
 }
 
-// Navigation between Home and Credential
+// Navigation setup
 function setupNavigation() {
-  const homeScreen = document.getElementById('homeScreen');
-  const credentialScreen = document.getElementById('credentialScreen');
   const openUpnBtn = document.getElementById('openUpnCard');
   const upnBackBtn = document.getElementById('upnBackBtn');
 
-  function showHome(pushHistory = true) {
-    credentialScreen.classList.add('screen-hidden');
-    homeScreen.classList.remove('screen-hidden');
-    window.scrollTo(0, 0);
-    if (pushHistory) {
-      history.pushState({ screen: 'home' }, '', '#home');
-    }
-  }
-
-  function showCredential(pushHistory = true) {
-    homeScreen.classList.add('screen-hidden');
-    credentialScreen.classList.remove('screen-hidden');
-    window.scrollTo(0, 0);
-    if (pushHistory) {
-      history.pushState({ screen: 'credential' }, '', '#upn');
-    }
-  }
-
   if (openUpnBtn) {
-    openUpnBtn.addEventListener('click', () => showCredential(true));
+    openUpnBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.showCredentialScreen(true);
+    });
   }
 
   if (upnBackBtn) {
-    upnBackBtn.addEventListener('click', () => showHome(true));
+    upnBackBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.showHomeScreen(true);
+    });
   }
 
   // Handle browser / mobile back button
   window.addEventListener('popstate', (e) => {
     if (e.state && e.state.screen === 'credential') {
-      showCredential(false);
+      window.showCredentialScreen(false);
     } else {
-      showHome(false);
+      window.showHomeScreen(false);
     }
   });
 
   // Check initial hash
   if (window.location.hash === '#upn') {
-    showCredential(false);
+    window.showCredentialScreen(false);
   } else {
-    showHome(false);
+    window.showHomeScreen(false);
   }
 }
 
@@ -252,17 +290,17 @@ function setupEventListeners() {
 
   // Open modal from Home Screen
   if (homeEditBtn) {
-    homeEditBtn.addEventListener('click', openModal);
+    homeEditBtn.addEventListener('click', window.openModal);
   }
 
   // Close modal
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', window.closeModal);
 
   // Close on outside click
   if (modal) {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
+      if (e.target === modal) window.closeModal();
     });
   }
 
@@ -278,7 +316,7 @@ function setupEventListeners() {
 
       saveData();
       renderAllViews();
-      closeModal();
+      window.closeModal();
       showToast('¡Datos actualizados con éxito!');
     });
   }
@@ -291,7 +329,7 @@ function setupEventListeners() {
         saveData();
         renderAllViews();
         populateModalForm();
-        closeModal();
+        window.closeModal();
         showToast('Valores restablecidos a los originales');
       }
     });
@@ -331,31 +369,22 @@ function setupEventListeners() {
   }
 }
 
-function openModal() {
-  populateModalForm();
-  const modal = document.getElementById('editModal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-}
-
-function closeModal() {
-  const modal = document.getElementById('editModal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-}
-
 function populateModalForm() {
-  document.getElementById('inputFirstName').value = studentData.firstName;
-  document.getElementById('inputLastName').value = studentData.lastName;
-  document.getElementById('inputCareer').value = studentData.career;
-  document.getElementById('inputLevel').value = studentData.level;
-  document.getElementById('inputStatus').value = studentData.status;
-  document.getElementById('inputCode').value = studentData.studentCode;
-  document.getElementById('modalPhotoPreview').src = studentData.photoUrl || 'assets/avatar.png';
+  const fName = document.getElementById('inputFirstName');
+  const lName = document.getElementById('inputLastName');
+  const car = document.getElementById('inputCareer');
+  const lvl = document.getElementById('inputLevel');
+  const st = document.getElementById('inputStatus');
+  const cd = document.getElementById('inputCode');
+  const preview = document.getElementById('modalPhotoPreview');
+
+  if (fName) fName.value = studentData.firstName;
+  if (lName) lName.value = studentData.lastName;
+  if (car) car.value = studentData.career;
+  if (lvl) lvl.value = studentData.level;
+  if (st) st.value = studentData.status;
+  if (cd) cd.value = studentData.studentCode;
+  if (preview) preview.src = studentData.photoUrl || 'assets/avatar.png';
 }
 
 // Compress Image Helper
@@ -430,7 +459,10 @@ function registerServiceWorker() {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('./sw.js')
-        .then((reg) => console.log('Service Worker registered:', reg.scope))
+        .then((reg) => {
+          console.log('Service Worker registered:', reg.scope);
+          reg.update();
+        })
         .catch((err) => console.log('Service Worker registration failed:', err));
     });
   }

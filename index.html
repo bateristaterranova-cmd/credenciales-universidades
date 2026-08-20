@@ -241,8 +241,8 @@
             <p id="homeUserCareer" class="text-xs text-slate-500 mt-0.5">Adm. y Negoc. Internacionales</p>
           </div>
         </div>
-        <button id="homeEditBtn" class="bg-slate-100 hover:bg-purple-50 hover:text-brandPurple text-slate-700 p-2.5 rounded-xl transition-colors shrink-0 shadow-2xs" title="Configurar Datos">
-          <i class="fa-solid fa-user-pen text-base"></i>
+        <button id="homeEditBtn" onclick="openModal()" class="bg-slate-100 hover:bg-purple-50 hover:text-brandPurple text-slate-700 p-2.5 rounded-xl transition-colors shrink-0 shadow-2xs cursor-pointer active:scale-95" title="Configurar Datos">
+          <i class="fa-solid fa-user-pen text-base pointer-events-none"></i>
         </button>
       </div>
 
@@ -257,9 +257,9 @@
         </div>
 
         <!-- UPN CARD (Active & Featured) -->
-        <div id="openUpnCard" class="group bg-white rounded-2xl overflow-hidden border-2 border-amber-300 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative">
+        <div id="openUpnCard" onclick="showCredentialScreen()" role="button" tabindex="0" class="group bg-white rounded-2xl overflow-hidden border-2 border-amber-300 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.99] relative select-none">
           <!-- Card Banner -->
-          <div class="bg-[#f7a81b] p-4 flex items-center justify-between relative overflow-hidden">
+          <div class="bg-[#f7a81b] p-4 flex items-center justify-between relative overflow-hidden pointer-events-none">
             <div class="z-10 flex items-center gap-3">
               <div class="bg-black text-white font-anton text-sm tracking-wider px-2.5 py-1 rounded-md">
                 UPN
@@ -275,7 +275,7 @@
           </div>
 
           <!-- Card Body Preview -->
-          <div class="p-4 flex items-center justify-between bg-white">
+          <div class="p-4 flex items-center justify-between bg-white pointer-events-none">
             <div class="space-y-1">
               <div class="text-xs text-slate-400 font-medium">Formato de carné:</div>
               <div class="text-sm font-semibold text-slate-800 flex items-center gap-2">
@@ -339,8 +339,8 @@
     
     <!-- TOP HEADER (Exact 100% Match: Only Chevron and ID CARD) -->
     <header class="bg-white px-4 py-4 flex items-center shadow-sm z-30 sticky top-0 safe-top">
-      <button id="upnBackBtn" aria-label="Atrás" class="text-brandYellow mr-4 p-2 -ml-2 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none">
-        <i class="fa-solid fa-chevron-left text-xl"></i>
+      <button id="upnBackBtn" onclick="showHomeScreen()" aria-label="Atrás" class="text-brandYellow mr-4 p-2 -ml-2 rounded-full hover:bg-yellow-50 active:scale-95 transition-transform focus:outline-none cursor-pointer">
+        <i class="fa-solid fa-chevron-left text-xl pointer-events-none"></i>
       </button>
       <h1 class="text-xl font-bold font-anton tracking-wide text-black uppercase">ID CARD</h1>
     </header>
