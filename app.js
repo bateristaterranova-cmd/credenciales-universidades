@@ -7,7 +7,8 @@ const DEFAULT_DATA = {
   level: 'Pregrado',
   status: 'ACTIVO',
   studentCode: 'N00409105',
-  photoUrl: 'assets/avatar.png'
+  photoUrl: 'assets/avatar.png',
+  showStripes: true
 };
 
 const MONTH_NAMES_ES = [
@@ -95,6 +96,40 @@ window.closeModal = function(e) {
   }
 };
 
+// Global Toggle for Vertical Stripes (Con / Sin Franjas)
+window.toggleStripes = function(enabled) {
+  studentData.showStripes = enabled;
+  saveData();
+  updateStripesView();
+  showToast(enabled ? 'Franjas activadas' : 'Franjas ocultadas');
+};
+
+function updateStripesView() {
+  const bottomStripes = document.getElementById('bottomStripes');
+  const toggleInput = document.getElementById('toggleStripesInput');
+  const statusLabel = document.getElementById('stripesStatusLabel');
+
+  const isEnabled = studentData.showStripes !== false; // default true
+
+  if (bottomStripes) {
+    if (isEnabled) {
+      bottomStripes.style.removeProperty('display');
+      bottomStripes.classList.remove('hidden');
+    } else {
+      bottomStripes.style.setProperty('display', 'none', 'important');
+      bottomStripes.classList.add('hidden');
+    }
+  }
+
+  if (toggleInput) {
+    toggleInput.checked = isEnabled;
+  }
+
+  if (statusLabel) {
+    statusLabel.textContent = isEnabled ? 'Con franjas verticales' : 'Sin franjas (fondo liso)';
+  }
+}
+
 // Initialize App
 function initApp() {
   try {
@@ -140,6 +175,8 @@ function saveData() {
 // Render data across both Home and Credential Screens
 function renderAllViews() {
   try {
+    const photoSrc = studentData.photoUrl || 'assets/avatar.png';
+
     // 1. Home Profile Card & Preview
     const homeUserName = document.getElementById('homeUserName');
     const homeUserCareer = document.getElementById('homeUserCareer');
@@ -153,7 +190,7 @@ function renderAllViews() {
       homeUserCareer.textContent = studentData.career;
     }
     if (homeUserAvatar) {
-      homeUserAvatar.src = studentData.photoUrl || 'assets/avatar.png';
+      homeUserAvatar.src = photoSrc;
     }
     if (homeUserCode) {
       homeUserCode.textContent = `Código: ${studentData.studentCode || 'N00409105'}`;
@@ -180,7 +217,7 @@ function renderAllViews() {
       statusEl.textContent = studentData.status;
     }
     if (photoEl) {
-      photoEl.src = studentData.photoUrl || 'assets/avatar.png';
+      photoEl.src = photoSrc;
     }
 
     // Status badge styling
@@ -197,6 +234,7 @@ function renderAllViews() {
     }
 
     renderBarcode(studentData.studentCode || 'N00409105');
+    updateStripesView();
   } catch (err) {
     console.error('Error in renderAllViews:', err);
   }
@@ -371,7 +409,7 @@ function setupEventListeners() {
     });
   }
 
-  // Photo upload
+  // Photo upload - updates ALL views immediately!
   if (uploadPhotoBtn && photoInput) {
     uploadPhotoBtn.addEventListener('click', () => photoInput.click());
 
@@ -383,21 +421,43 @@ function setupEventListeners() {
       reader.onload = (event) => {
         compressImage(event.target.result, 360, 360, (compressedBase64) => {
           studentData.photoUrl = compressedBase64;
+          
+          // Update modal preview
           const preview = document.getElementById('modalPhotoPreview');
           if (preview) preview.src = compressedBase64;
+
+          // Update Home screen avatar immediately
+          const homeAvatar = document.getElementById('homeUserAvatar');
+          if (homeAvatar) homeAvatar.src = compressedBase64;
+
+          // Update Credential screen photo immediately
+          const studentPhoto = document.getElementById('studentPhoto');
+          if (studentPhoto) studentPhoto.src = compressedBase64;
+
+          saveData();
+          showToast('Foto actualizada');
         });
       };
       reader.readAsDataURL(file);
     });
   }
 
-  // Reset photo only
+  // Reset photo only - updates ALL views immediately!
   if (resetPhotoBtn) {
     resetPhotoBtn.addEventListener('click', () => {
       studentData.photoUrl = 'assets/avatar.png';
+      
       const preview = document.getElementById('modalPhotoPreview');
       if (preview) preview.src = 'assets/avatar.png';
-      showToast('Foto restablecida');
+
+      const homeAvatar = document.getElementById('homeUserAvatar');
+      if (homeAvatar) homeAvatar.src = 'assets/avatar.png';
+
+      const studentPhoto = document.getElementById('studentPhoto');
+      if (studentPhoto) studentPhoto.src = 'assets/avatar.png';
+
+      saveData();
+      showToast('Foto restablecida a la original');
     });
   }
 
